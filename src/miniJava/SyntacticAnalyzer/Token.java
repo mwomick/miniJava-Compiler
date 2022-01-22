@@ -23,7 +23,7 @@ final class Token {
 				this.kind = TokenKind.IDENTIFIER;
 			}
 			else {
-				throw new Exception("Unrecognized token");
+				throw new SyntaxError("Unrecognized token");
 			}
 		}
 	}
