@@ -3,12 +3,12 @@ package miniJava.SyntacticAnalyzer;
 import miniJava.Utils.Java;
 
 // TODO: should be protected, but for debug purposes, public
-public final class Token {
+public class Token {
 	
 	public TokenKind kind;
 	public String spelling;
 	
-	public Token(String spelling) {
+	public Token(String spelling) throws SyntaxError {
 		this.spelling = spelling;
 		
 		for(TokenKind kind : TokenKind.values()) {
@@ -24,7 +24,7 @@ public final class Token {
 				this.kind = TokenKind.IDENTIFIER;
 			}
 			else {
-				// TODO: handle this case
+				throw new SyntaxError("Illegal identifier \"" + this.spelling + "\"");
 			}
 		}
 	}

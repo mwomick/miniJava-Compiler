@@ -3,7 +3,7 @@ package miniJava.Utils;
 public final class Java {
 	
 	public static boolean isIdentifier(String s) {
-		if(ASCII.isLowercase(s.charAt(0))) {
+		if(ASCII.isChar(s.charAt(0))) {
 			for(char c : s.toCharArray()) {
 				if(ASCII.isDigit(c) || ASCII.isChar(c) || c == '_') {
 					continue;
@@ -12,13 +12,14 @@ public final class Java {
 					return false;
 				}
 			}
+			return true;
 		}
 		return false;
 	}
 	
 	public static boolean isInteger(String s) {
 		for(char c : s.toCharArray()) {
-			if(c < 48 && c > 57) {
+			if(c < 48 || c > 57) {
 				return false;
 			}
 		}

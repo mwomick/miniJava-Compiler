@@ -11,11 +11,13 @@ public final class Scanner {
 	
 	private char currentChar;
 	private StringBuilder currentSpelling;
-		
-	public Scanner(InputStream inputStream) {
+	
+	private boolean eof = false;
+	
+	public Scanner(InputStream inputStream) throws SyntaxError {
 		this.inputStream = inputStream;
 		this.currentSpelling = new StringBuilder();
-		readChar();
+		peek();
 	}
 	
 	public Token scan() throws SyntaxError {
@@ -23,40 +25,59 @@ public final class Scanner {
 		return scanToken();
 	}
 		
-	private void scanSeparator() {
-		// TODO: scan over comments like WS
+	private void reset() {
+		currentSpelling.setLength(0);
+	}
+	
+	private void scanSeparator() throws SyntaxError {
 		while(currentChar == ' '
 				|| currentChar == '\n'
 				|| currentChar == '\r'
 				|| currentChar == '\t')
-			readChar();
+			peek();
 	}
 	
 	private Token scanToken() throws SyntaxError {
 		switch(currentChar) {
-		case ';':
-		case '{':
-		case '}':
-		case '(':
-		case ')':
-		case '[':
-		case ']':
-		case '+':
-		case '-':
-		case '*':
-		case '/':
-			next();
+
+		case ';':	case '.':	case '{':	case '}':
+		case '(':	case ')':	case '[':	case ']':
+		case '+':	case '-':	case '*':	
+			take();
 			break;
 			
-		case '!':
-		case '>':
-		case '<':
-		case '=':
-			next();
-			if(currentChar == '=') {
-				next();
-			}
+		case '!':	case '>':	case '<':	case '=':
+			take();
+			if(currentChar == '=') take();
 			break;
+			
+		case '/':
+			take();
+			if(currentChar == '/') {
+				while(currentChar != '\n' && !eof) {
+					peek();
+				}
+				peek();
+				reset();
+				return scan();
+			}
+			else if(currentChar == '*') {
+				while(true) {
+					while(currentChar != '*') {
+						peek();
+					}
+					peek();
+					if(currentChar == '/') {
+						break;
+					}
+				}
+				peek();
+				reset();
+				return scan();
+			}
+			else {
+				break;
+			}	
 			
 		case '\u0000':
 			close();
@@ -64,32 +85,33 @@ public final class Scanner {
 			
 		default:
 			while(ASCII.isChar(currentChar) 
-					|| ASCII.isDigit(currentChar)) {
-				next();
-			}			
+					|| ASCII.isDigit(currentChar))
+				take();	
 		}
 		
 		if(currentSpelling.isEmpty()) { throw new SyntaxError(); }
 		
 		Token tok = new Token(currentSpelling.toString());
-		currentSpelling.setLength(0);
+		reset();
 		return tok;
 		
 	}
 	
-	private void next() { 
+	private void take() throws SyntaxError { 
 		currentSpelling.append(currentChar);
-		readChar();			
+		peek();			
 	}
 	
 	private void close() {
 		currentSpelling.append(currentChar);
 	}
 	
-	private void readChar() {
+	private void peek() throws SyntaxError {
 		try {
+			if(eof) { throw new SyntaxError(); }
 			int c = inputStream.read();
 			currentChar = (char) c;
+			if(c == '\u0000') { eof = true; }
 		} catch (IOException e) {
 			// TODO: handle exception
 			System.out.println("IOException");
