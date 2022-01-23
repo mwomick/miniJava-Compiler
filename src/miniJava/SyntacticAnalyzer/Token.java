@@ -2,7 +2,7 @@ package miniJava.SyntacticAnalyzer;
 
 import miniJava.Utils.Java;
 
-// should be protected, but for debug purposes, public
+// TODO: should be protected, but for debug purposes, public
 public final class Token {
 	
 	public TokenKind kind;
@@ -24,7 +24,7 @@ public final class Token {
 				this.kind = TokenKind.IDENTIFIER;
 			}
 			else {
-				// Handle
+				// TODO: handle this case
 			}
 		}
 	}

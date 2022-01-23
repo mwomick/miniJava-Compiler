@@ -28,6 +28,7 @@ public final class Scanner {
 	///////////////////////////////////////////////////////////////////////////////
 	
 	private void scanSeparator() {
+		// TODO: scan over comments like WS
 		while(currentChar == ' '
 				|| currentChar == '\n'
 				|| currentChar == '\r'
@@ -61,8 +62,8 @@ public final class Scanner {
 			}
 			break;
 			
-		case '\u0000':	
-			currentSpelling.append(currentChar);
+		case '\u0000':
+			close();
 			break;
 			
 		default:
@@ -85,6 +86,10 @@ public final class Scanner {
 			currentSpelling.append(currentChar);
 			readChar();			
 		}
+	}
+	
+	private void close() {
+		currentSpelling.append(currentChar);
 	}
 	
 	private void readChar() {

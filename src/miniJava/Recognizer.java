@@ -11,7 +11,7 @@ import miniJava.SyntacticAnalyzer.SyntaxError;
 public class Recognizer {
 
 	public static void main(String[] args) {
-		InputStream inputStream = new ByteArrayInputStream("public class Sample { public static void main(String[|] args) { int e = 42; if(e == 42){ return; }} }\u0000".getBytes());
+		InputStream inputStream = new ByteArrayInputStream("public class Sample { public static void main(String[] args) { int e = 42; if(e == 42){ return; }} }\u0000".getBytes());
 
 		Scanner scanner = new Scanner(inputStream);
 		try {
