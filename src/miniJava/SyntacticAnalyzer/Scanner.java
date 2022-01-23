@@ -12,16 +12,17 @@ public final class Scanner {
 	private char currentChar;
 	private StringBuilder currentSpelling;
 	
+	private boolean eof = false;
+	
 	public Scanner(InputStream inputStream) {
 		this.inputStream = inputStream;
+		this.currentSpelling = new StringBuilder();
 		readChar();
 	}
 	
-	public Token scan() {
+	public Token scan() throws SyntaxError {
 		scanSeparator();
-		Token tok = scanToken();
-		
-		return tok;
+		return scanToken();
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////
@@ -31,13 +32,12 @@ public final class Scanner {
 				|| currentChar == '\n'
 				|| currentChar == '\r'
 				|| currentChar == '\t')
-			next();
+			readChar();
 	}
 	
-	private Token scanToken() {
-		
+	private Token scanToken() throws SyntaxError {
 		switch(currentChar) {
-		
+		case ';':
 		case '{':
 		case '}':
 		case '(':
@@ -61,28 +61,40 @@ public final class Scanner {
 			}
 			break;
 			
+		case '\u0000':	
+			currentSpelling.append(currentChar);
+			break;
+			
 		default:
 			while(ASCII.isChar(currentChar) 
 					|| ASCII.isDigit(currentChar)) {
 				next();
-			}
-			
+			}			
 		}
 		
-		return new Token(currentSpelling.toString());
+		if(currentSpelling.isEmpty()) { throw new SyntaxError(); }
+		
+		Token tok = new Token(currentSpelling.toString());
+		currentSpelling.setLength(0);
+		return tok;
 		
 	}
 	
-	private void next() {
-		currentSpelling.append(currentChar);
-		readChar();
+	private void next() { 
+		if(!eof) {
+			currentSpelling.append(currentChar);
+			readChar();			
+		}
 	}
 	
 	private void readChar() {
 		try {
 			int c = inputStream.read();
-			currentChar = (char) c;			
+			currentChar = (char) c;
+			if(currentChar == '\u0000') { eof = true; }
 		} catch (IOException e) {
+			eof = true;
+			System.out.println("IOException");
 			// TODO: handle exception
 		}
 	}

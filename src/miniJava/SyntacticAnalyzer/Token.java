@@ -2,7 +2,8 @@ package miniJava.SyntacticAnalyzer;
 
 import miniJava.Utils.Java;
 
-final class Token {
+// should be protected, but for debug purposes, public
+public final class Token {
 	
 	public TokenKind kind;
 	public String spelling;

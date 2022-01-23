@@ -1,6 +1,6 @@
 package miniJava.Utils;
 
-public class Java {
+public final class Java {
 	
 	public static boolean isIdentifier(String s) {
 		if(ASCII.isLowercase(s.charAt(0))) {
