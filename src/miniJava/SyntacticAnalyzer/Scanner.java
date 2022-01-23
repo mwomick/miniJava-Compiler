@@ -11,9 +11,7 @@ public final class Scanner {
 	
 	private char currentChar;
 	private StringBuilder currentSpelling;
-	
-	private boolean eof = false;
-	
+		
 	public Scanner(InputStream inputStream) {
 		this.inputStream = inputStream;
 		this.currentSpelling = new StringBuilder();
@@ -24,9 +22,7 @@ public final class Scanner {
 		scanSeparator();
 		return scanToken();
 	}
-	
-	///////////////////////////////////////////////////////////////////////////////
-	
+		
 	private void scanSeparator() {
 		// TODO: scan over comments like WS
 		while(currentChar == ' '
@@ -82,10 +78,8 @@ public final class Scanner {
 	}
 	
 	private void next() { 
-		if(!eof) {
-			currentSpelling.append(currentChar);
-			readChar();			
-		}
+		currentSpelling.append(currentChar);
+		readChar();			
 	}
 	
 	private void close() {
@@ -96,11 +90,9 @@ public final class Scanner {
 		try {
 			int c = inputStream.read();
 			currentChar = (char) c;
-			if(currentChar == '\u0000') { eof = true; }
 		} catch (IOException e) {
-			eof = true;
-			System.out.println("IOException");
 			// TODO: handle exception
+			System.out.println("IOException");
 		}
 	}
 }
