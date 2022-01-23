@@ -7,7 +7,7 @@ final class Token {
 	public TokenKind kind;
 	public String spelling;
 	
-	public Token(String spelling) throws Exception {
+	public Token(String spelling) {
 		this.spelling = spelling;
 		
 		for(TokenKind kind : TokenKind.values()) {
@@ -23,7 +23,7 @@ final class Token {
 				this.kind = TokenKind.IDENTIFIER;
 			}
 			else {
-				throw new SyntaxError("Unrecognized token");
+				// Handle
 			}
 		}
 	}
