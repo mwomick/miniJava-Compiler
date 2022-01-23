@@ -89,7 +89,7 @@ public final class Scanner {
 				take();	
 		}
 		
-		if(currentSpelling.isEmpty()) { throw new SyntaxError(); }
+		if(currentSpelling.isEmpty()) { throw new SyntaxError("Encountered unidentified symbol: " + currentChar); }
 		
 		Token tok = new Token(currentSpelling.toString());
 		reset();
@@ -108,7 +108,7 @@ public final class Scanner {
 	
 	private void peek() throws SyntaxError {
 		try {
-			if(eof) { throw new SyntaxError(); }
+			if(eof) { throw new SyntaxError("Unexpectedly reached end of file."); }
 			int c = inputStream.read();
 			currentChar = (char) c;
 			if(c == '\u0000') { eof = true; }

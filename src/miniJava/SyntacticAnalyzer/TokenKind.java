@@ -18,7 +18,7 @@ public enum TokenKind {
 	LITERAL("<literal>"), IDENTIFIER("<identifier>");       // operands
 	
 	public final String spelling;
-
+	
     private TokenKind(String spelling) {
         this.spelling = spelling;
     }
