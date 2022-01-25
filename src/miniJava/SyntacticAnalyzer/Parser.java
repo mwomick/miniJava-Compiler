@@ -15,7 +15,7 @@ public class Parser {
 	public boolean parse() throws SyntaxError {
 		boolean e = parseStatement();
 		System.out.println("Terminated on: " + currentToken.kind);
-		return e;
+		return e && expect(TokenKind.EOT);
 	}
 	
 	private boolean expect(TokenKind kind) {		
@@ -59,7 +59,7 @@ public class Parser {
 							&& parseExpr()
 							&& expect(TokenKind.RPAREN)
 							&& parseStatement();
-			if(expect(TokenKind.ELSE)) { parseStatement(); }
+			if(res && expect(TokenKind.ELSE)) { return parseStatement();  }
 			return res;
 		}
 		else if(expect(TokenKind.WHILE)) {
@@ -118,7 +118,15 @@ public class Parser {
 			if(expect(TokenKind.PLUS)
 				|| expect(TokenKind.MINUS)
 				|| expect(TokenKind.DIV)
-				|| expect(TokenKind.MULT)) {
+				|| expect(TokenKind.MULT)
+				|| expect(TokenKind.AND_AND)
+				|| expect(TokenKind.OR_OR)
+				|| expect(TokenKind.GT)
+				|| expect(TokenKind.LT)
+				|| expect(TokenKind.EQ_EQ)
+				|| expect(TokenKind.LT_EQ)
+				|| expect(TokenKind.GT_EQ)
+				|| expect(TokenKind.NOT_EQ)) {
 				res = false;
 				continue;
 			}
