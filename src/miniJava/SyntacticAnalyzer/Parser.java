@@ -5,6 +5,7 @@ public class Parser {
 	Scanner scanner;
 	
 	Token currentToken;
+	int count;
 	
 	public Parser(Scanner scanner) {
 		this.scanner = scanner;
@@ -12,17 +13,14 @@ public class Parser {
 	}
 	
 	public boolean parse() throws SyntaxError {
-		boolean e = parseExpr();
+		boolean e = parseStatement();
 		System.out.println("Terminated on: " + currentToken.kind);
 		return e;
 	}
 	
-	private void accept() {
-		currentToken = scanner.next();
-	}
-	
-	private boolean expect(TokenKind kind) {
+	private boolean expect(TokenKind kind) {		
 		if(kind == currentToken.kind) {
+			count++;
 			currentToken = scanner.next();
 			return true;
 		}
@@ -31,23 +29,63 @@ public class Parser {
 		}
 	}
 	
-	private boolean parseReference() {
-		switch(currentToken.kind) {
-		case IDENTIFIER:
-		case THIS:
-			accept();
-			break;
-		default:
-			return false;
+	private boolean parseStatement() {
+		if(expect(TokenKind.INT) || expect(TokenKind.BOOL)) {
+			return expect(TokenKind.IDENTIFIER) 
+					&& expect(TokenKind.EQ) 
+					&& parseExpr() 
+					&& expect(TokenKind.SEMICOLON);
 		}
-		
-		if(expect(TokenKind.DOT)) {
-			if(!expect(TokenKind.IDENTIFIER)) {
-				return false;
+		else if(parseReference()) {
+			if(expect(TokenKind.EQ)) {
+				return parseExpr() && expect(TokenKind.SEMICOLON);
+			}
+			else if(expect(TokenKind.LSQUARE)) {
+				return parseExpr() && expect(TokenKind.RSQUARE) 
+						&& expect(TokenKind.EQ) 
+						&& parseExpr()
+						&& expect(TokenKind.SEMICOLON);
+			}
+			else if(expect(TokenKind.LPAREN)) {
+				return parseArgs() && expect(TokenKind.SEMICOLON);
 			}
 		}
+		else if(expect(TokenKind.RETURN)) {
+			parseExpr();
+			return expect(TokenKind.SEMICOLON);
+		}
+		else if(expect(TokenKind.IF)) {
+			boolean res = expect(TokenKind.LPAREN)
+							&& parseExpr()
+							&& expect(TokenKind.RPAREN)
+							&& parseStatement();
+			if(expect(TokenKind.ELSE)) { parseStatement(); }
+			return res;
+		}
+		else if(expect(TokenKind.WHILE)) {
+			return expect(TokenKind.LPAREN) 
+					&& parseExpr()
+					&& expect(TokenKind.RPAREN)
+					&& parseStatement();
+		}
+		else if(expect(TokenKind.LBRACE)) {
+			int cnt = count;
+			while(parseStatement()) { cnt = count; }
+			return cnt == count && expect(TokenKind.RBRACE);
+		}
+		return false;
 		
-		return true;
+	}
+	
+	private boolean parseReference() {
+		if(expect(TokenKind.IDENTIFIER) 
+			|| expect(TokenKind.THIS)) {
+			if(expect(TokenKind.DOT)) {
+				return expect(TokenKind.IDENTIFIER);
+			}
+			return true;
+		}
+		return false;
 	}
 	
 	private boolean parseArgs() {
