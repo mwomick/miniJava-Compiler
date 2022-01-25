@@ -20,7 +20,7 @@ public final class Scanner {
 		peek();
 	}
 	
-	public Token scan() throws SyntaxError {
+	public Token next() throws SyntaxError {
 		scanSeparator();
 		return scanToken();
 	}
@@ -42,7 +42,7 @@ public final class Scanner {
 
 		case ';':	case '.':	case '{':	case '}':
 		case '(':	case ')':	case '[':	case ']':
-		case '+':	case '-':	case '*':	
+		case '+':	case '-':	case '*':	case ',':
 			take();
 			break;
 			
@@ -59,7 +59,7 @@ public final class Scanner {
 				}
 				peek();
 				reset();
-				return scan();
+				return next();
 			}
 			else if(currentChar == '*') {
 				while(true) {
@@ -73,7 +73,7 @@ public final class Scanner {
 				}
 				peek();
 				reset();
-				return scan();
+				return next();
 			}
 			else {
 				break;
@@ -89,7 +89,7 @@ public final class Scanner {
 				take();	
 		}
 		
-		if(currentSpelling.isEmpty()) { throw new SyntaxError("Encountered unidentified symbol: " + currentChar); }
+		if(currentSpelling.isEmpty()) { throw new SyntaxError("Encountered invalid symbol: " + currentChar); }
 		
 		Token tok = new Token(currentSpelling.toString());
 		reset();

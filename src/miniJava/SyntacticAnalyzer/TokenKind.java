@@ -13,7 +13,8 @@ public enum TokenKind {
 	PLUS("+"), MINUS("-"), MULT("*"), DIV("/"),				// arithmetic operators
 	IF("if"), ELSE("else"), 								// control symbols
 	WHILE("while"), RETURN("return"),
-	SEMICOLON(";"), DOT("."), EQ("="),
+	SEMICOLON(";"), DOT("."), EQ("="), COMMA(","),
+	THIS("this"),
 	EOT("\u0000"),											// end of text
 	LITERAL("<literal>"), IDENTIFIER("<identifier>");       // operands
 	

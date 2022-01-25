@@ -1,6 +1,7 @@
 package miniJava.SyntacticAnalyzer;
+import java.lang.Error;
 
-public class SyntaxError extends Exception {
+public class SyntaxError extends Error {
 
 	SyntaxError() {
 		super();
