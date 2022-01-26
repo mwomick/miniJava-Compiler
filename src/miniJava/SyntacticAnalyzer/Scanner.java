@@ -79,7 +79,7 @@ public final class Scanner {
 				break;
 			}	
 			
-		case '\u0000':
+		case 0xFFFF:
 			close();
 			break;
 			
@@ -89,7 +89,9 @@ public final class Scanner {
 				take();	
 		}
 		
-		if(currentSpelling.isEmpty()) { throw new SyntaxError("Encountered invalid symbol: " + currentChar); }
+		if(currentSpelling.isEmpty()) {
+			throw new SyntaxError("Encountered invalid symbol: " + (int)currentChar); 
+		}
 		
 		Token tok = new Token(currentSpelling.toString());
 		reset();
@@ -103,7 +105,7 @@ public final class Scanner {
 	}
 	
 	private void close() {
-		currentSpelling.append(currentChar);
+		currentSpelling.append("EOT");
 	}
 	
 	private void peek() throws SyntaxError {
@@ -111,7 +113,7 @@ public final class Scanner {
 			if(eof) { throw new SyntaxError("Unexpectedly reached end of file."); }
 			int c = inputStream.read();
 			currentChar = (char) c;
-			if(c == '\u0000') { eof = true; }
+			if(c == -1) { eof = true; }
 		} catch (IOException e) {
 			// TODO: handle exception
 			System.out.println("IOException");

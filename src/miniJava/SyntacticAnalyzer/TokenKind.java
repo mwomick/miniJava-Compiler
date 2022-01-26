@@ -15,7 +15,7 @@ public enum TokenKind {
 	WHILE("while"), RETURN("return"),
 	SEMICOLON(";"), DOT("."), EQ("="), COMMA(","),
 	THIS("this"),
-	EOT("\u0000"),											// end of text
+	EOT("EOT"),											// end of text
 	LITERAL("<literal>"), IDENTIFIER("<identifier>");       // operands
 	
 	public final String spelling;

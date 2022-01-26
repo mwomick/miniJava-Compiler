@@ -1,0 +1,10 @@
+class Test001 {
+	int h;
+	int i;
+	int j;
+	private static void method(){
+		j = 1 + 1;
+	}
+	private static void method() {
+	} 
+}

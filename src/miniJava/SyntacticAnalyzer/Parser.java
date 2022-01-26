@@ -13,7 +13,7 @@ public class Parser {
 	}
 	
 	public boolean parse() throws SyntaxError {
-		boolean e = parseStatement();
+		boolean e = parseProgram();
 		System.out.println("Terminated on: " + currentToken.kind);
 		return e && expect(TokenKind.EOT);
 	}
@@ -29,8 +29,88 @@ public class Parser {
 		}
 	}
 	
+	private boolean parseProgram() {
+		int cnt = count;
+		while(parseClass()) { 
+			cnt = count;
+		}
+		return cnt == count && expect(TokenKind.EOT);
+	}
+	
+	private boolean parseClass() {
+		if(expect(TokenKind.CLASS) 
+				&& expect(TokenKind.IDENTIFIER)
+				&& expect(TokenKind.LBRACE)) {
+			int cnt = count;
+			while(parseFieldDecl() || parseMethodDecl()) {
+				cnt = count;
+			}
+			return cnt == count && expect(TokenKind.RBRACE);
+		}
+		return false;
+	}
+	
+	private boolean parseVisibility() {
+		return (expect(TokenKind.PUBLIC) 
+				|| expect(TokenKind.PRIVATE));
+	}
+	
+	private boolean parseFieldDecl() {
+		parseVisibility();
+		expect(TokenKind.STATIC);
+		if(parseType()) {
+			return expect(TokenKind.IDENTIFIER) 
+					&& expect(TokenKind.SEMICOLON);
+		}
+		return false;
+	}
+	
+	private boolean parseParams() {
+		int cnt = count;
+		while(parseType() && expect(TokenKind.IDENTIFIER)) {
+			if(expect(TokenKind.COMMA)) {
+				continue;
+			}
+			cnt = count;
+			break;
+		}
+		return cnt == count;
+	}
+	
+	private boolean parseMethodDecl() {
+		parseVisibility();
+		expect(TokenKind.STATIC);
+		if(parseType() || expect(TokenKind.VOID)) {
+			if(expect(TokenKind.IDENTIFIER) 
+					&& expect(TokenKind.LPAREN)
+					&& parseParams()
+					&& expect(TokenKind.RPAREN)
+					&& expect(TokenKind.LBRACE)) {
+				int cnt = count;
+				while(parseStatement()) {
+					cnt = count;
+				}
+				return cnt == count && expect(TokenKind.RBRACE);
+			}			
+			return false;
+		}
+		return false;
+	}
+	
+	private boolean parseType() {
+		if(expect(TokenKind.INT) || expect(TokenKind.IDENTIFIER)) {
+			if(expect(TokenKind.LSQUARE)) {
+				return expect(TokenKind.RSQUARE);
+			}
+			return true;
+		}
+		else {
+			return expect(TokenKind.BOOL);
+		}
+	}
+	
 	private boolean parseStatement() {
-		if(expect(TokenKind.INT) || expect(TokenKind.BOOL)) {
+		if(parseType()) {
 			return expect(TokenKind.IDENTIFIER) 
 					&& expect(TokenKind.EQ) 
 					&& parseExpr() 
@@ -59,7 +139,9 @@ public class Parser {
 							&& parseExpr()
 							&& expect(TokenKind.RPAREN)
 							&& parseStatement();
-			if(res && expect(TokenKind.ELSE)) { return parseStatement();  }
+			if(res && expect(TokenKind.ELSE)) { 
+				return parseStatement();  
+			}
 			return res;
 		}
 		else if(expect(TokenKind.WHILE)) {
