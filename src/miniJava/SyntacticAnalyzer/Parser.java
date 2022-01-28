@@ -14,7 +14,7 @@ public class Parser {
 	
 	public boolean parse() throws SyntaxError {
 		boolean e = parseProgram();
-		System.out.println("Terminated on: " + currentToken.kind);
+		System.out.println("Terminated on " + currentToken.kind + " with spelling '" + currentToken.spelling +"'");
 		return e && expect(TokenKind.EOT);
 	}
 	
@@ -27,6 +27,11 @@ public class Parser {
 		else {
 			return false;
 		}
+	}
+	
+	private void accept() {
+		count++;
+		currentToken = scanner.next();
 	}
 	
 	private boolean parseProgram() {
@@ -42,7 +47,7 @@ public class Parser {
 				&& expect(TokenKind.IDENTIFIER)
 				&& expect(TokenKind.LBRACE)) {
 			int cnt = count;
-			while(parseFieldDecl() || parseMethodDecl()) {
+			while(parseClassBodyElem()) {
 				cnt = count;
 			}
 			return cnt == count && expect(TokenKind.RBRACE);
@@ -55,46 +60,44 @@ public class Parser {
 				|| expect(TokenKind.PRIVATE));
 	}
 	
-	private boolean parseFieldDecl() {
+	private boolean parseClassBodyElem() {
 		parseVisibility();
 		expect(TokenKind.STATIC);
-		if(parseType()) {
-			return expect(TokenKind.IDENTIFIER) 
-					&& expect(TokenKind.SEMICOLON);
-		}
-		return false;
-	}
-	
-	private boolean parseParams() {
-		int cnt = count;
-		while(parseType() && expect(TokenKind.IDENTIFIER)) {
-			if(expect(TokenKind.COMMA)) {
-				continue;
+		switch(currentToken.kind) {
+		case IDENTIFIER:
+		case INT:
+			accept();
+			if(expect(TokenKind.LSQUARE)) {
+				if(!expect(TokenKind.RSQUARE)) {
+					return false;
+				}
 			}
-			cnt = count;
-			break;
-		}
-		return cnt == count;
-	}
-	
-	private boolean parseMethodDecl() {
-		parseVisibility();
-		expect(TokenKind.STATIC);
-		if(parseType() || expect(TokenKind.VOID)) {
-			if(expect(TokenKind.IDENTIFIER) 
-					&& expect(TokenKind.LPAREN)
+			
+		case BOOL:
+		case VOID:
+			if(currentToken.kind == TokenKind.BOOL 
+				||currentToken.kind == TokenKind.VOID) { 
+				accept(); 
+			}
+			if(expect(TokenKind.IDENTIFIER)) {
+				if(expect(TokenKind.LPAREN) 
 					&& parseParams()
 					&& expect(TokenKind.RPAREN)
 					&& expect(TokenKind.LBRACE)) {
-				int cnt = count;
-				while(parseStatement()) {
-					cnt = count;
+					int cnt = count;
+					while(parseStatement()) {
+						cnt = count;
+					}
+					return cnt == count 
+							&& expect(TokenKind.RBRACE);
 				}
-				return cnt == count && expect(TokenKind.RBRACE);
-			}			
+				else {
+					return expect(TokenKind.SEMICOLON);
+				}
+			}
+		default:
 			return false;
 		}
-		return false;
 	}
 	
 	private boolean parseType() {
@@ -109,28 +112,106 @@ public class Parser {
 		}
 	}
 	
-	private boolean parseStatement() {
-		if(parseType()) {
-			return expect(TokenKind.IDENTIFIER) 
+	private boolean parseParams() {
+		int cnt = count;
+		while(parseType() && expect(TokenKind.IDENTIFIER)) {
+			if(expect(TokenKind.COMMA)) {
+				continue;
+			}
+			cnt = count;
+			break;
+		}
+		return cnt == count;
+	}
+
+	
+	private boolean parseDecl() {
+		if(expect(TokenKind.IDENTIFIER)) {
+			if(expect(TokenKind.LPAREN) 
+				&& parseParams()
+				&& expect(TokenKind.RPAREN)
+				&& expect(TokenKind.LBRACE)) {
+				int cnt = count;
+				while(parseStatement()) {
+					cnt = count;
+				}
+				return cnt == count 
+						&& expect(TokenKind.RBRACE);
+			}
+			else {
+				return expect(TokenKind.SEMICOLON);
+			}
+		}
+		return false;
+	}
+	
+	private boolean parseDeclStatement() {
+		return expect(TokenKind.IDENTIFIER) && expect(TokenKind.EQ) && parseExpr() && expect(TokenKind.SEMICOLON);
+	}
+	
+	private boolean parseReferenceStatement() {
+		switch(currentToken.kind) {
+		case EQ:
+			accept();
+			return parseExpr() && expect(TokenKind.SEMICOLON);
+		case LSQUARE:
+			accept();
+			return parseExpr() && expect(TokenKind.RSQUARE) 
 					&& expect(TokenKind.EQ) 
-					&& parseExpr() 
+					&& parseExpr()
 					&& expect(TokenKind.SEMICOLON);
+		case LPAREN:
+			accept();
+			return parseArgs() && expect(TokenKind.SEMICOLON);
+		default:
+			return false;
 		}
-		else if(parseReference()) {
-			if(expect(TokenKind.EQ)) {
-				return parseExpr() && expect(TokenKind.SEMICOLON);
+	}
+	
+	private boolean parseStatement() {
+		boolean parseDecl = false;
+		switch(currentToken.kind) {
+		case IDENTIFIER:
+		case INT:
+			if(currentToken.kind == TokenKind.INT) {
+				parseDecl = true;
 			}
-			else if(expect(TokenKind.LSQUARE)) {
-				return parseExpr() && expect(TokenKind.RSQUARE) 
-						&& expect(TokenKind.EQ) 
-						&& parseExpr()
-						&& expect(TokenKind.SEMICOLON);
+			accept();
+			if(expect(TokenKind.LSQUARE)) {
+				if(!expect(TokenKind.RSQUARE)) {
+					return false;
+				}
 			}
-			else if(expect(TokenKind.LPAREN)) {
-				return parseArgs() && expect(TokenKind.SEMICOLON);
+			else if(!parseDecl) {
+				if(expect(TokenKind.DOT)) {
+					if(!expect(TokenKind.IDENTIFIER)) {
+						return false;
+					}
+				}
+				return parseReferenceStatement();
 			}
+			
+		case BOOL:		
+			if(currentToken.kind == TokenKind.BOOL) {
+				accept();
+				parseDecl = true;
+			}
+			if(parseDecl) { return parseDeclStatement(); }
+		
+		case THIS:
+			if(currentToken.kind == TokenKind.THIS) { accept(); }
+			if(expect(TokenKind.DOT)) {
+				if(!expect(TokenKind.IDENTIFIER)) {
+					return false;
+				}
+			}
+			return parseReferenceStatement();
+			
+		default:
+			break;
 		}
-		else if(expect(TokenKind.RETURN)) {
+		
+		if(expect(TokenKind.RETURN)) {
 			parseExpr();
 			return expect(TokenKind.SEMICOLON);
 		}
