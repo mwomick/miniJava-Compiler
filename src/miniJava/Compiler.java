@@ -7,6 +7,7 @@ import java.io.InputStream;
 
 import miniJava.SyntacticAnalyzer.Parser;
 import miniJava.SyntacticAnalyzer.Scanner;
+import miniJava.SyntacticAnalyzer.SyntaxError;
 
 public class Compiler {
 
@@ -14,12 +15,12 @@ public class Compiler {
 		Compiler compiler = new Compiler(args);
 		Scanner scanner = new Scanner(compiler.inputStream);
 		Parser parser = new Parser(scanner);
-		if(parser.parse()) {
+		try {
+			parser.parse();
 			System.out.println("Success.");
 			System.exit(0);
-		}
-		else {
-			compiler.error("Something went wrong.");
+		} catch(SyntaxError e) {
+			compiler.error(e.toString());
 			System.exit(4);
 		}
 	}

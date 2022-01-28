@@ -5,6 +5,7 @@ import java.io.IOException;
 import miniJava.Compiler;
 import miniJava.SyntacticAnalyzer.Parser;
 import miniJava.SyntacticAnalyzer.Scanner;
+import miniJava.SyntacticAnalyzer.SyntaxError;
 
 class Tester {
 
@@ -28,11 +29,22 @@ class Tester {
 		}
 		Scanner scanner = new Scanner(compiler.inputStream);
 		Parser parser = new Parser(scanner);
-		if(parser.parse() == shouldPass) {
-			System.out.println(filePath + ": Pass");
-		}
-		else {
-			System.err.println(filePath + ": Fail");
+		
+		try {
+			parser.parse();
+			if(shouldPass) {
+				System.out.println(filePath + ": Pass");
+			}
+			else {
+				System.err.println(filePath + ": Fail");
+			}
+		} catch(SyntaxError e) {
+			if(!shouldPass) {
+				System.out.println(filePath + ": Pass");
+			}
+			else {
+				System.err.println(filePath + ": Fail");
+			}
 		}
 	}
 }
