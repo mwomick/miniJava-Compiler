@@ -7,8 +7,9 @@ import miniJava.SyntacticAnalyzer.Parser;
 import miniJava.SyntacticAnalyzer.Scanner;
 
 class Tester {
+
 	public static void main(String[] args) {
-		for(int i = 0; i < 5; i++) {
+		for(int i = 0; i < 12; i++) {
 			String fileNo = String.format("%03d", i);
 			MakeTest("test/cases/Test" + fileNo + ".mjava");
 		}
@@ -23,15 +24,15 @@ class Tester {
 			shouldPass = compiler.inputStream.read() == 'P';
 			compiler.inputStream.read();
 		} catch (IOException e) { 
-			System.out.println("Illegally formatted test file '" + filePath +"'."); 
+			System.out.println("Illegally formatted test file '" + filePath + "'."); 
 		}
 		Scanner scanner = new Scanner(compiler.inputStream);
 		Parser parser = new Parser(scanner);
 		if(parser.parse() == shouldPass) {
-			System.out.println("Pass.");
+			System.out.println(filePath + ": Pass");
 		}
 		else {
-			System.out.println("Fail.");
+			System.err.println(filePath + ": Fail");
 		}
 	}
 }

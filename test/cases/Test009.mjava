@@ -1,0 +1,12 @@
+// P
+class Test009 {
+	void method(int a, bool b, Type c) {
+		if(a == b) {
+			c.A = b;
+		}
+		else {
+			c.A = 100;
+		}
+		return;
+	}
+}

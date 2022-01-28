@@ -1,0 +1,6 @@
+// P
+class Test008 {
+	void method(int a, bool b, Type c) {
+		c = 1 + d / 18 + b;
+	}
+}

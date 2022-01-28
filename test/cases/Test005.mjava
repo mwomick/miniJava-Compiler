@@ -1,0 +1,18 @@
+// P
+class Test004 {
+	int i;
+	int j;
+	int k;
+	int l;
+	int m;
+	int n;
+	
+	bool a;
+	bool b;
+	bool c;
+	
+	int[] o;
+	int[] p;
+	
+	
+}

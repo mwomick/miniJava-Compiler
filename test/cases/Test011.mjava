@@ -1,0 +1,8 @@
+// P
+class Test011 {
+	void main() {
+		A.test();
+		A.test(a, b);
+		A.test[3] = a;
+	}
+}

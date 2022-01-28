@@ -130,30 +130,12 @@ public class Parser {
 		}
 		return cnt == count;
 	}
-
-	
-	private boolean parseDecl() {
-		if(expect(TokenKind.IDENTIFIER)) {
-			if(expect(TokenKind.LPAREN) 
-				&& parseParams()
-				&& expect(TokenKind.RPAREN)
-				&& expect(TokenKind.LBRACE)) {
-				int cnt = count;
-				while(parseStatement()) {
-					cnt = count;
-				}
-				return cnt == count 
-						&& expect(TokenKind.RBRACE);
-			}
-			else {
-				return expect(TokenKind.SEMICOLON);
-			}
-		}
-		return false;
-	}
 	
 	private boolean parseDeclStatement() {
-		return expect(TokenKind.IDENTIFIER) && expect(TokenKind.EQ) && parseExpr() && expect(TokenKind.SEMICOLON);
+		return expect(TokenKind.IDENTIFIER) 
+				&& expect(TokenKind.EQ) 
+				&& parseExpr() 
+				&& expect(TokenKind.SEMICOLON);
 	}
 	
 	private boolean parseReferenceStatement() {
