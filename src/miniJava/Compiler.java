@@ -25,30 +25,47 @@ public class Compiler {
 	}
 	
 	int rc = 4;
-	InputStream inputStream;
+	public InputStream inputStream;
 	
-	Compiler(String[] args) {
-		processArgs(args);
+	public Compiler(String[] args) {
+		try {
+			init(args[0]);
+		} catch (FileFormatException e) {
+			error("FileFormatException: File '" + args[0] 
+					+ "' is not a .mjava or .java file.");
+		}
 	}
 	
-	private void error(String msg) {
+	public Compiler(String filePath) {
+		try {
+			init(filePath);
+		} catch (FileFormatException e) {
+			error("FileFormatException: File '" + filePath 
+					+ "' is not a .mjava or .java file.");
+		}
+	}
+	
+	public void error(String msg) {
 		System.err.println(msg);
 		System.err.flush();
 		System.exit(4);
 	}
 	
-	private void processArgs(String argv[]) {
-		int pos = argv[0].length() - 5;
-		if(argv[0].substring(pos).equals(".java") 
-				|| argv[0].substring(pos-1).equals(".mjava")) {
-			File file = new File(argv[0]);
+	private void init(String filePath) throws FileFormatException {
+		int pos = filePath.length() - 5;
+		if(filePath.substring(pos).equals(".java") 
+				|| filePath.substring(pos-1).equals(".mjava")) {
+			File file = new File(filePath);
 			try {
 				inputStream = new FileInputStream(file);
 			} catch (FileNotFoundException e) {
-				error("FileNotFoundException File '" 
-						+ argv[0] 
+				error("FileNotFoundException: File '" 
+						+ filePath 
 						+ "' not found.");
 			}
+		}
+		else {
+			throw new FileFormatException();
 		}
 	}
 }

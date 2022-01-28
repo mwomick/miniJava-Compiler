@@ -5,6 +5,8 @@ public class Parser {
 	Scanner scanner;
 	
 	Token currentToken;
+	boolean debug = true;
+	
 	int count;
 	
 	public Parser(Scanner scanner) {
@@ -14,7 +16,12 @@ public class Parser {
 	
 	public boolean parse() throws SyntaxError {
 		boolean e = parseProgram();
-		System.out.println("Terminated on " + currentToken.kind + " with spelling '" + currentToken.spelling +"'");
+		if(debug) {			
+			System.out.println("Terminated on " 
+					+ currentToken.kind 
+					+ " with spelling '" 
+					+ currentToken.spelling +"'");
+		}
 		return e && expect(TokenKind.EOT);
 	}
 	
@@ -260,10 +267,10 @@ public class Parser {
 				return true;
 			}
 			else {
-				break;
+				return false;
 			}
 		}
-		return false;
+		return expect(TokenKind.RPAREN);
 	}
 	
 	private boolean parseUnop() {

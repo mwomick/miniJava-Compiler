@@ -5,8 +5,7 @@ import java.util.Map;
 
 import miniJava.Utils.Java;
 
-// TODO: should be protected, but for debug purposes, public
-public class Token {
+class Token {
 	
     static final Map<String, TokenKind> LUT; 
 
