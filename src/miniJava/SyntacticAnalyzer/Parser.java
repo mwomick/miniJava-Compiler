@@ -19,7 +19,9 @@ public class Parser {
 			return true;
 		}
 		else {
-			throw new SyntaxError("Terminated on '" 
+			throw new SyntaxError("Terminated on token of kind " 
+									+ currentToken.kind 
+									+ " with spelling '" 
 									+ currentToken.spelling 
 									+ "'");
 		}
@@ -131,76 +133,96 @@ public class Parser {
 		return cnt == count;
 	}
 	
-	private boolean parseDeclStatement() {
-		return expect(TokenKind.IDENTIFIER) 
-				&& expect(TokenKind.EQ) 
-				&& parseExpr() 
-				&& expect(TokenKind.SEMICOLON);
-	}
-	
-	private boolean parseReferenceStatement() {
-		switch(currentToken.kind) {
-		case EQ:
-			accept();
-			return parseExpr() && expect(TokenKind.SEMICOLON);
-		case LSQUARE:
-			accept();
-			return parseExpr() && expect(TokenKind.RSQUARE) 
-					&& expect(TokenKind.EQ) 
-					&& parseExpr()
-					&& expect(TokenKind.SEMICOLON);
-		case LPAREN:
-			accept();
-			return parseArgs() && expect(TokenKind.SEMICOLON);
-		default:
-			return false;
-		}
-	}
-	
 	private boolean parseStatement() {
-		boolean parseDecl = false;
-		switch(currentToken.kind) {
-		case IDENTIFIER:
-		case INT:
-			if(currentToken.kind == TokenKind.INT) {
-				parseDecl = true;
+		if(expect(TokenKind.THIS)) {
+			expect(TokenKind.DOT);
+			parseReference();
+			switch(currentToken.kind) {
+			case EQ:
+				accept();
+				return (parseExpr() && expect(TokenKind.SEMICOLON));
+			case LSQUARE:
+				accept();
+				return (parseExpr() 
+						&& expect(TokenKind.RSQUARE) 
+						&& expect(TokenKind.EQ)
+						&& parseExpr()
+						&& expect(TokenKind.SEMICOLON));
+			case LPAREN:
+				accept();
+				return (parseArgs()
+						&& expect(TokenKind.SEMICOLON));
+			default:
+				return false;
 			}
-			accept();
-			if(expect(TokenKind.LSQUARE)) {
-				if(!expect(TokenKind.RSQUARE)) {
-					return false;
-				}
-			}
-			else if(!parseDecl) {
-				if(expect(TokenKind.DOT)) {
-					if(!expect(TokenKind.IDENTIFIER)) {
+		}
+		else if(expect(TokenKind.IDENTIFIER)) {
+			if(expect(TokenKind.IDENTIFIER)) {
+				if(expect(TokenKind.LSQUARE)) {
+					if(!expect(TokenKind.RSQUARE)) {
 						return false;
 					}
 				}
-				return parseReferenceStatement();
+				return expect(TokenKind.EQ) 
+						&& parseExpr()
+						&& expect(TokenKind.SEMICOLON);
 			}
-			
-		case BOOL:		
-			if(currentToken.kind == TokenKind.BOOL) {
-				accept();
-				parseDecl = true;
+			else if(expect(TokenKind.LSQUARE)) {
+				if(!expect(TokenKind.RSQUARE)) { 
+					return false;
+				}
+				if(expect(TokenKind.IDENTIFIER)) {
+					if(expect(TokenKind.LSQUARE)) {
+						if(!expect(TokenKind.RSQUARE)) {
+							return false;
+						}
+					}
+					return expect(TokenKind.EQ) 
+							&& parseExpr()
+							&& expect(TokenKind.SEMICOLON);
+				}
 			}
-			if(parseDecl) { return parseDeclStatement(); }
-		
-		case THIS:
-			if(currentToken.kind == TokenKind.THIS) { accept(); }
-			if(expect(TokenKind.DOT)) {
-				if(!expect(TokenKind.IDENTIFIER)) {
+			else {
+				expect(TokenKind.DOT);
+				parseReference();
+				switch(currentToken.kind) {
+				case EQ:
+					accept();
+					return (parseExpr() && expect(TokenKind.SEMICOLON));
+				case LSQUARE:
+					accept();
+					return (parseExpr() 
+							&& expect(TokenKind.RSQUARE) 
+							&& expect(TokenKind.EQ)
+							&& parseExpr()
+							&& expect(TokenKind.SEMICOLON));
+				case LPAREN:
+					accept();
+					return (parseArgs()
+							&& expect(TokenKind.SEMICOLON));
+				default:
 					return false;
 				}
 			}
-			return parseReferenceStatement();
-			
-		default:
-			break;
 		}
-		
-		if(expect(TokenKind.RETURN)) {
+		else if(expect(TokenKind.INT)) {
+			if(expect(TokenKind.LSQUARE)) {
+				if(!expect(TokenKind.RSQUARE))
+					return false;
+			}
+			
+			return expect(TokenKind.IDENTIFIER)
+					&& expect(TokenKind.EQ) 
+					&& parseExpr()
+					&& expect(TokenKind.SEMICOLON);
+		}
+		else if(expect(TokenKind.BOOL)) {
+			return  expect(TokenKind.IDENTIFIER)
+					&& expect(TokenKind.EQ) 
+					&& parseExpr()
+					&& expect(TokenKind.SEMICOLON);
+		}
+		else if(expect(TokenKind.RETURN)) {
 			parseExpr();
 			return expect(TokenKind.SEMICOLON);
 		}
@@ -232,8 +254,10 @@ public class Parser {
 	private boolean parseReference() {
 		if(expect(TokenKind.IDENTIFIER) 
 			|| expect(TokenKind.THIS)) {
-			if(expect(TokenKind.DOT)) {
-				return expect(TokenKind.IDENTIFIER);
+			while(expect(TokenKind.DOT)) {
+				if(!expect(TokenKind.IDENTIFIER)) {
+					break;
+				}
 			}
 			return true;
 		}
